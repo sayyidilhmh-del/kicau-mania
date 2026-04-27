@@ -1,7 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import gsap from 'gsap'
-import { FaceMesh } from '@mediapipe/face_mesh'
-import { Hands } from '@mediapipe/hands'
+// MediaPipe dimuat via script tag agar kompatibel di production (Vercel)
+const loadScript = (src) => new Promise((resolve, reject) => {
+  if (document.querySelector(`script[src="${src}"]`)) { resolve(); return }
+  const s = document.createElement('script')
+  s.src = src
+  s.onload = resolve
+  s.onerror = reject
+  document.head.appendChild(s)
+})
 
 const CAT_POSITIONS = ['center', 'top-left', 'top-right', 'bottom-left', 'bottom-right']
 const CAT_SIZE_RATIO = 0.38
@@ -201,7 +208,9 @@ function App() {
         })
 
         setLoadingText('Memuat Face Detection...')
-        const faceMesh = new FaceMesh({
+        await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js')
+        await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js')
+        const faceMesh = new window.FaceMesh({
           locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${f}`
         })
         faceMesh.setOptions({
@@ -216,7 +225,7 @@ function App() {
         })
 
         setLoadingText('Memuat Hand Tracking...')
-        const hands = new Hands({
+        const hands = new window.Hands({
           locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`
         })
         hands.setOptions({
